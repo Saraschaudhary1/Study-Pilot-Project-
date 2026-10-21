@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8ff">
+  <meta name="description"
+    content="StudyPilot helps students learn from their own notes with summaries, quizzes, flashcards, study plans, and an AI study assistant.">
+  <title>StudyPilot — Your notes, your study plan</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%234f46e5'/%3E%3Cpath d='M7 15 20 8l13 7-13 7zM12 19v7c5 4 11 4 16 0v-7l-8 4z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <!-- PDF.js and Mammoth let this static demo read text from PDFs and DOCX files in the browser. -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+  <!-- Reusable SVG icons keep the interface crisp without adding an icon package. -->
+  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-cap" viewBox="0 0 24 24">
+      <path d="m2 9 10-5 10 5-10 5L2 9Z" />
+      <path d="M6 11v5c3.5 2.7 8.5 2.7 12 0v-5M22 9v6" />
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24">
+      <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" />
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2" />
+    </symbol>
+    <symbol id="i-file" viewBox="0 0 24 24">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
+      <path d="M13 2v7h7M8 14h8M8 18h6" />
+    </symbol>
+    <symbol id="i-message" viewBox="0 0 24 24">
+      <path
+        d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.1a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3h.5A8.5 8.5 0 0 1 21 11.5Z" />
+    </symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24">
+      <path
+        d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM5 2l.7 1.3L7 4l-1.3.7L5 6l-.7-1.3L3 4l1.3-.7L5 2Z" />
+    </symbol>
+    <symbol id="i-book" viewBox="0 0 24 24">
+      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22Z" />
+      <path d="M4 4.5V22M8 6h8M8 10h8" />
+    </symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24">
+      <path d="M12 16V4m-5 5 5-5 5 5" />
+      <path d="M20 16.5v3a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5v-3" />
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3" />
+      <path
+        d="m19.4 15 .1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.3a2 2 0 1 1-4 0v-.2a2 2 0 0 0-3.4-1.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 1.6 11.6h-.2a2 2 0 1 1 0-4h.2A2 2 0 0 0 3 4.2l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a2 2 0 0 0 3.4-1.4v-.2a2 2 0 1 1 4 0V0a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0 1.4 3.4h.2a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.4 3.4Z"
+        transform="translate(2 2) scale(.83)" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24">
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m16 16 5 5" />
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24">
+      <path d="m9 18 6-6-6-6" />
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" />
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="m5 12 4 4L19 6" />
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24">
+      <path d="M3 6h18M8 6V4h8v2m-11 0 1 15h12l1-15M10 10v7M14 10v7" />
+    </symbol>
+    <symbol id="i-download" viewBox="0 0 24 24">
+      <path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3" />
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24">
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" />
+      <path
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24">
+      <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z" />
+    </symbol>
+    <symbol id="i-send" viewBox="0 0 24 24">
+      <path d="m22 2-7 20-4-9-9-4Z" />
+      <path d="M22 2 11 13" />
+    </symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24">
+      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path d="m3 12 9 5 9-5M3 16l9 5 9-5" />
+    </symbol>
+    <symbol id="i-target" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1" />
+    </symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24">
+      <path d="M10 17l5-5-5-5M15 12H3" />
+      <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+    </symbol>
+  </svg>
+
+  <!-- LANDING PAGE: public-facing introduction based on blueprint page 1. -->
+  <section id="landingView" class="landing-view">
+    <header class="site-header wrap">
+      <a class="brand" href="#home" data-action="show-landing" aria-label="StudyPilot home">
+        <span class="brand-mark"><svg class="icon">
+            <use href="#i-cap" />
+          </svg></span>
+        <span>StudyPilot</span>
+      </a>
+      <nav class="landing-nav" aria-label="Main navigation">
+        <a href="#home" data-action="show-landing">Home</a>
+        <a href="#features" data-action="scroll-features">Features</a>
+        <a href="#about" data-action="scroll-about">About</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost" data-action="open-login">Log in</button>
+      </div>
+      <button class="icon-button mobile-nav-toggle" data-action="toggle-landing-nav" aria-label="Open navigation"><svg
+          class="icon">
+          <use href="#i-menu" />
+        </svg></button>
+    </header>
+
+    <main id="home">
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> Your personal AI study space</span>
+          <h1>Your AI study planner, <span>powered by your notes.</span></h1>
+          <p class="hero-description">Turn lecture notes into clear summaries, useful quizzes, revision flashcards, and
+            a study plan that feels manageable.</p>
+          <div class="hero-proof">
+            <div class="proof-avatars"><span>S</span><span>A</span><span>R</span></div><span>Made for the way students
+              learn</span><span class="proof-divider"></span><span class="proof-stars">★★★★★</span>
+          </div>
+        </div>
+
+        <!-- Lightweight illustrative dashboard: no external image is needed. -->
+        <div class="hero-art" aria-label="Illustration of a study workspace">
+          <div class="art-glow"></div>
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="floating-card float-summary"><span class="mini-icon mint"><svg class="icon">
+                <use href="#i-file" />
+              </svg></span><span><b>Smart summaries</b><small>Key ideas, made clear</small></span></div>
+          <div class="floating-card float-quiz"><span class="mini-icon lilac"><svg class="icon">
+                <use href="#i-target" />
+              </svg></span><span><b>Practice quiz</b><small>Learn by recalling</small></span></div>
+          <div class="floating-card float-plan"><span class="mini-icon blue"><svg class="icon">
+                <use href="#i-calendar" />
+              </svg></span><span><b>Study plan</b><small>One step at a time</small></span></div>
+          <div class="laptop">
+            <div class="laptop-camera"></div>
+            <div class="laptop-screen">
+              <div class="mock-window-top"><span></span><span></span><span></span><small>studypilot / my-notes</small>
+              </div>
+              <div class="mock-screen-body">
+                <div class="mock-sidebar"><i></i><i></i><i></i><i></i></div>
+                <div class="mock-document"><b>Today's learning</b><span class="mock-line w80"></span><span
+                    class="mock-line w65"></span>
+                  <div class="mock-note"><span>✓</span>
+                    <div><b>Data Structures</b><small>3 key ideas found</small></div>
+                  </div>
+                  <div class="mock-note"><span>✦</span>
+                    <div><b>Quick review</b><small>5 questions ready</small></div>
+                  </div><span class="mock-line w90"></span><span class="mock-line w65"></span>
+                </div>
+              </div>
+            </div>
+            <div class="laptop-base"></div>
+          </div>
+          <div class="art-book book-back"></div>
+          <div class="art-book book-front"></div>
+          <div class="plant"><span class="plant-leaf leaf-a"></span><span class="plant-leaf leaf-b"></span><span
+              class="plant-leaf leaf-c"></span><span class="plant-pot"></span></div>
+          <div class="art-sparkle sparkle-a">✦</div>
+          <div class="art-sparkle sparkle-b">✧</div>
+        </div>
+      </section>
+
+      <section class="benefits-strip wrap" id="features">
+        <article class="benefit"><span class="benefit-icon icon-blue"><svg class="icon">
+              <use href="#i-file" />
+            </svg></span>
+          <div>
+            <h3>Smart summaries</h3>
+            <p>Get the key ideas without the overload.</p>
+          </div>
+        </article>
+        <article class="benefit"><span class="benefit-icon icon-purple"><svg class="icon">
+              <use href="#i-target" />
+            </svg></span>
+          <div>
+            <h3>AI quizzes</h3>
+            <p>Check what you remember, not just read.</p>
+          </div>
+        </article>
+        <article class="benefit"><span class="benefit-icon icon-mint"><svg class="icon">
+              <use href="#i-calendar" />
+            </svg></span>
+          <div>
+            <h3>Personal study plan</h3>
+            <p>Break your goals into doable sessions.</p>
+          </div>
+        </article>
+        <article class="benefit"><span class="benefit-icon icon-peach"><svg class="icon">
+              <use href="#i-book" />
+            </svg></span>
+          <div>
+            <h3>Note-based answers</h3>
+            <p>Keep your own material at the center.</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="how-section wrap" id="about">
+        <div class="section-heading"><span class="eyebrow">A calmer way to study</span>
+          <h2>From scattered notes to <span>study-ready.</span></h2>
+          <p>Bring your material, choose what you need, and make progress one focused session at a time.</p>
+        </div>
+        <div class="how-grid">
+          <article><span class="step-number">01</span>
+            <div class="how-icon"><svg class="icon">
+                <use href="#i-upload" />
+              </svg></div>
+            <h3>Add your notes</h3>
+            <p>Bring PDFs, DOCX files, or text notes into your study space.</p>
+          </article>
+          <article><span class="step-number">02</span>
+            <div class="how-icon"><svg class="icon">
+                <use href="#i-sparkles" />
+              </svg></div>
+            <h3>Choose your study tool</h3>
+            <p>Ask a question, summarize a chapter, or build a quick quiz.</p>
+          </article>
+          <article><span class="step-number">03</span>
+            <div class="how-icon"><svg class="icon">
+                <use href="#i-target" />
+              </svg></div>
+            <h3>Review with purpose</h3>
+            <p>Use practice questions and a simple plan to keep moving.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer wrap"><a class="brand" href="#home" data-action="show-landing"><span
+          class="brand-mark"><svg class="icon">
+            <use href="#i-cap" />
+          </svg></span><span>StudyPilot</span></a><span>Study smarter, one note at a time.</span></footer>
+  </section>
+
+
+  <!-- **************************************  -->
+
+  <!-- Yaha se sidebar hai  -->
+  <section id="appView" class="app-view hidden">
+    <aside id="sidebar" class="sidebar">
+      <a class="brand app-brand" href="#dashboard" data-action="go-view" data-view="dashboard"><span
+          class="brand-mark"><svg class="icon">
+            <use href="#i-cap" />
+          </svg></span><span>StudyPilot</span></a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Workspace navigation">
+        <button class="nav-item active" data-action="go-view" data-view="dashboard"><svg class="icon">
+            <use href="#i-home" />
+          </svg><span>Dashboard</span></button>
+        <button class="nav-item" data-action="go-view" data-view="events"><svg class="icon">
+            <use href="#i-calendar" />
+          </svg><span>Events & reminders</span></button>
+        <button class="nav-item" data-action="go-view" data-view="uploads"><svg class="icon">
+            <use href="#i-file" />
+          </svg><span>My notes</span><span id="sidebarNoteCount" class="nav-count">0</span></button>
+        <button class="nav-item" data-action="go-view" data-view="studyplan"><svg class="icon">
+            <use href="#i-target" />
+          </svg><span>Study plan</span></button>
+      </nav>
+      <div class="workspace-label tools-label">STUDY TOOLS</div>
+      <nav class="side-nav" aria-label="Study tools">
+        <button class="nav-item" data-action="go-view" data-view="summarize"><svg class="icon">
+            <use href="#i-sparkles" />
+          </svg><span>Summarize notes</span></button>
+        <button class="nav-item" data-action="go-view" data-view="quiz"><svg class="icon">
+            <use href="#i-target" />
+          </svg><span>Practice quiz</span></button>
+        <button class="nav-item" data-action="go-view" data-view="flashcards"><svg class="icon">
+            <use href="#i-layers" />
+          </svg><span>Flashcards</span></button>
+        <button class="nav-item" data-action="go-view" data-view="tutor"><svg class="icon">
+            <use href="#i-message" />
+          </svg><span>Ask from notes</span></button>
+      </nav>
+      
+      <div class="side-bottom"><button class="nav-item" data-action="go-view" data-view="settings"><svg class="icon">
+            <use href="#i-settings" />
+          </svg><span>Settings</span></button><button class="nav-item" data-action="back-landing"><svg class="icon">
+            <use href="#i-log-out" />
+          </svg><span>Log out</span></button></div>
+      <div class="sidebar-user">
+        <div class="avatar avatar-user" id="sidebarAvatar">S</div>
+        <div class="user-meta"><b id="sidebarName">Student</b><small>Personal workspace</small></div><button
+          class="tiny-more" data-action="go-view" data-view="settings" aria-label="Open settings">···</button>
+      </div>
+    </aside>
+
+    
+    <div class="app-main">
+      <header class="app-topbar">
+        <button class="icon-button sidebar-toggle" data-action="toggle-sidebar" aria-label="Toggle sidebar"><svg
+            class="icon">
+            <use href="#i-menu" />
+          </svg></button>
+        <div class="breadcrumbs"><span>Workspace</span><svg class="icon">
+            <use href="#i-chevron" />
+          </svg><b id="breadcrumbCurrent">Dashboard</b></div>
+        <div class="topbar-actions">
+          <label class="search-box"><svg class="icon">
+              <use href="#i-search" />
+            </svg><input id="globalSearch" type="search" placeholder="Search notes, topics..."
+              aria-label="Search notes and topics"><kbd>⌘ K</kbd></label>
+          <button class="icon-button notification-button" data-action="show-notifications"
+            aria-label="Notifications"><svg class="icon">
+              <use href="#i-bell" />
+            </svg><span class="notification-dot"></span></button>
+          <button class="profile-chip" data-action="go-view" data-view="settings"><span class="avatar avatar-user"
+              id="topbarAvatar">S</span><span id="topbarName">Student</span><svg class="icon">
+              <use href="#i-chevron" />
+            </svg></button>
+        </div>
+      </header>
+      <main id="appContent" class="app-content" tabindex="-1"></main>
+    </div>
+  </section>
+
+  <!-- The floating tutor is shown on non-dashboard views. The dashboard has its own embedded panel. -->
+  <button id="floatingChatButton" class="floating-chat-button hidden" data-action="toggle-chat-drawer"
+    aria-label="Open StudyBot"><svg class="icon">
+      <use href="#i-message" />
+    </svg><span>Ask StudyBot</span></button>
+  <div id="chatDrawer" class="chat-drawer hidden" aria-label="StudyBot conversation"></div>
+
+  <!-- Modal and toast roots are shared by login, add-event, quiz, and file feedback flows. -->
+  <div id="modalRoot"></div>
+  <div id="toastRoot" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+</body>
+
+</html>
